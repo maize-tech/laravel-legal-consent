@@ -37,11 +37,11 @@ class AcceptLegalDocumentListenerTest extends TestCase
 
         $event = new Registered($user);
 
-        $listener = new AcceptLegalDocumentListener;
+        $listener = new AcceptLegalDocumentListener();
 
         $listener->handle($event);
 
-        $table = (new LegalConsent)->getTable();
+        $table = (new LegalConsent())->getTable();
 
         $this->assertDatabaseCount($table, 2);
     }
@@ -71,11 +71,11 @@ class AcceptLegalDocumentListenerTest extends TestCase
 
         $event = new Registered($user);
 
-        $listener = new AcceptLegalDocumentListener;
+        $listener = new AcceptLegalDocumentListener();
 
         $listener->handle($event);
 
-        $table = (new LegalConsent)->getTable();
+        $table = (new LegalConsent())->getTable();
 
         $this->assertDatabaseCount($table, 1);
     }
@@ -100,11 +100,11 @@ class AcceptLegalDocumentListenerTest extends TestCase
 
         $event = new Registered($user);
 
-        $listener = new AcceptLegalDocumentListener;
+        $listener = new AcceptLegalDocumentListener();
 
         $listener->handle($event);
 
-        $table = (new LegalConsent)->getTable();
+        $table = (new LegalConsent())->getTable();
 
         $this->assertDatabaseCount($table, 0);
     }
@@ -112,14 +112,14 @@ class AcceptLegalDocumentListenerTest extends TestCase
     /** @test */
     public function ignore_event_if_not_have_user_setted()
     {
-        $event = new class() {
+        $event = new class () {
         };
 
-        $listener = new AcceptLegalDocumentListener;
+        $listener = new AcceptLegalDocumentListener();
 
         $listener->handle($event);
 
-        $table = (new LegalConsent)->getTable();
+        $table = (new LegalConsent())->getTable();
 
         $this->assertDatabaseCount($table, 0);
     }

@@ -27,7 +27,7 @@ class LegalConsentTest extends TestCase
             $doc->getKey()
         );
 
-        $table = (new LegalConsent)->getTable();
+        $table = (new LegalConsent())->getTable();
 
         $this
             ->actingAs($user, 'api')
@@ -52,7 +52,7 @@ class LegalConsentTest extends TestCase
             $doc->getKey()
         );
 
-        $table = (new LegalConsent)->getTable();
+        $table = (new LegalConsent())->getTable();
 
         $this
             ->postJson($route)

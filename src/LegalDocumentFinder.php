@@ -33,13 +33,13 @@ abstract class LegalDocumentFinder
     {
         $legalDocumentModelClass = (string) config('legal-consent.legal_document_model');
 
-        return new $legalDocumentModelClass;
+        return new $legalDocumentModelClass();
     }
 
     protected function validateType(string $type): void
     {
         if (! in_array($type, config('legal-consent.allowed_document_types'))) {
-            throw new InvalidDocumentTypeException;
+            throw new InvalidDocumentTypeException();
         }
     }
 }
