@@ -228,6 +228,30 @@ Here is a sample response body:
 
 This endpoint stores the consent for the given document from the currently authenticated user.
 
+### Legal Document Listener
+
+You can eventually accept all active legal documents using our listener.
+
+This can be useful, for example, when your application handles the registration of users, and they must accept all legal documents through a checkbox before proceeding.
+
+In this case, all you should do is add the listener to the `Registered` event in `EventServiceProvider`:
+
+``` php
+use Maize\LegalConsent\Listeners\AcceptLegalDocumentListener;
+
+/**
+ * The event listener mappings for the application.
+ *
+ * @var array
+ */
+protected $listen = [
+    Registered::class => [
+        AcceptLegalDocumentListener::class, // all currently active legal documents will be accepted
+        SendEmailVerificationNotification::class,
+    ],
+];
+```
+
 ## Testing
 
 ```bash
