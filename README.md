@@ -145,18 +145,39 @@ return [
 
 ### Basic
 
-To use the package, add the `Maize\LegalConsent\HasLegalConsent` trait to the User model.
+To use the package, add the `Maize\LegalConsent\HasLegalConsent` trait to the all Authenticatable models you want to handle.
 
-Here's an example model including the `HasLegalConsent` trait:
+Here's an example including the `HasLegalConsent` trait to both User and Admin models:
 
 ``` php
 <?php
 
 namespace App\Models;
 
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Maize\LegalConsent\HasLegalConsent;
 
-class User extends Model
+class User extends Authenticatable
+{
+    use HasLegalConsent;
+
+    protected $fillable = [
+        'fist_name',
+        'last_name',
+        'email',
+    ];
+}
+```
+
+``` php
+<?php
+
+namespace App\Models;
+
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Maize\LegalConsent\HasLegalConsent;
+
+class Admin extends Authenticatable
 {
     use HasLegalConsent;
 
@@ -188,7 +209,7 @@ Here are the fields who should be filled:
 Let's say we create a privacy policy document with the publication on 2021-01-01: here's the model entity we would have:
 
 ``` php
-$nps = [
+$legalDocument = [
     "id" => 1,
     "type" => "privacy-policy",
     "body" => "The privacy policy's very long text",

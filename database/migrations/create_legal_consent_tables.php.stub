@@ -19,7 +19,7 @@ class CreateLegalConsentTables extends Migration
 
         Schema::create('legal_consents', function (Blueprint $table) {
             $table->foreignId('document_id')->constrained('legal_documents')->cascadeOnUpdate()->cascadeOnDelete();
-            $table->foreignId('user_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
+            $table->morphs('user');
             $table->timestamps();
         });
     }

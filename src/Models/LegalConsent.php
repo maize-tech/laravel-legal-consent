@@ -13,6 +13,7 @@ class LegalConsent extends Pivot
 
     protected $fillable = [
         'document_id',
+        'user_type',
         'user_id',
     ];
 }

@@ -56,6 +56,9 @@ class TestCase extends Orchestra
         include_once __DIR__.'/../database/migrations/create_users_table.php.stub';
         (new \CreateUsersTable())->up();
 
+        include_once __DIR__.'/../database/migrations/create_admins_table.php.stub';
+        (new \CreateAdminsTable())->up();
+
         include_once __DIR__.'/../database/migrations/create_legal_consent_tables.php.stub';
         (new \CreateLegalConsentTables())->up();
     }

@@ -112,7 +112,7 @@ class AcceptLegalDocumentListenerTest extends TestCase
     /** @test */
     public function ignore_event_if_not_have_user_setted()
     {
-        $event = new class () {
+        $event = new class() {
         };
 
         $listener = new AcceptLegalDocumentListener();

@@ -2,11 +2,27 @@
 
 namespace Maize\LegalConsent;
 
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\Cache;
 use Maize\LegalConsent\Models\LegalDocument;
 
 trait HasLegalConsent
 {
+    public static function bootHasLegalConsent(): void
+    {
+        static::deleted(
+            fn ($model) => $model->legalConsents()->delete()
+        );
+    }
+
+    public function legalConsents(): MorphMany
+    {
+        return $this->morphMany(
+            config('legal-consent.legal_consent_model'),
+            'user'
+        );
+    }
+
     public function hasAcceptedDefaultLegalDocument(string $type): bool
     {
         $document = $this->findDefaultLegalDocumentForType($type);
@@ -20,23 +36,19 @@ trait HasLegalConsent
 
     public function hasAcceptedLegalDocument(LegalDocument $document): bool
     {
-        $legalConsentModelClass = config('legal-consent.legal_consent_model');
-
         return Cache::remember(
             $this->legalCacheKey($document),
             config('legal-consent.cache.document_user_ttl'),
-            fn () => $legalConsentModelClass::query()
-                ->where([
-                    'document_id' => $document->getKey(),
-                    'user_id' => $this->getKey(),
-                ])
+            fn () => $this
+                ->legalConsents()
+                ->where('document_id', $document->getKey())
                 ->exists()
         );
     }
 
     protected function legalCacheKey(LegalDocument $document): string
     {
-        return "legal.documents.{$document->getKey()}.users.{$this->getKey()}";
+        return "legal.documents.{$document->getKey()}.{$this->getMorphClass()}.{$this->getKey()}";
     }
 
     public function acceptDefaultLegalDocument(string $type): void
@@ -48,11 +60,8 @@ trait HasLegalConsent
 
     public function acceptLegalDocument(LegalDocument $document): void
     {
-        $legalConsentModelClass = config('legal-consent.legal_consent_model');
-
-        $legalConsentModelClass::firstOrCreate([
+        $this->legalConsents()->firstOrCreate([
             'document_id' => $document->getKey(),
-            'user_id' => $this->getKey(),
         ]);
 
         Cache::forget(
