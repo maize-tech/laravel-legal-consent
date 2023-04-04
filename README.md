@@ -3,8 +3,8 @@
 # Laravel Legal Consent
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/maize-tech/laravel-legal-consent.svg?style=flat-square)](https://packagist.org/packages/maize-tech/laravel-legal-consent)
-[![GitHub Tests Action Status](https://img.shields.io/github/workflow/status/maize-tech/laravel-legal-consent/run-tests?label=tests)](https://github.com/maize-tech/laravel-legal-consent/actions?query=workflow%3ATests+branch%3Amain)
-[![GitHub Code Style Action Status](https://img.shields.io/github/workflow/status/maize-tech/laravel-legal-consent/Check%20&%20fix%20styling?label=code%20style)](https://github.com/maize-tech/laravel-legal-consent/actions?query=workflow%3A"Check+%26+fix+styling"+branch%3Amain)
+[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/maize-tech/laravel-legal-consent/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/maize-tech/laravel-legal-consent/actions?query=workflow%3Arun-tests+branch%3Amain)
+[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/maize-tech/laravel-legal-consent/php-cs-fixer.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/maize-tech/laravel-legal-consent/actions?query=workflow%3A"Check+%26+fix+styling"+branch%3Amain)
 [![Total Downloads](https://img.shields.io/packagist/dt/maize-tech/laravel-legal-consent.svg?style=flat-square)](https://packagist.org/packages/maize-tech/laravel-legal-consent)
 
 Easily integrate legal documents (like privacy policies, terms of use, etc.) to your application.
