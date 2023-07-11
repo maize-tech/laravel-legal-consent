@@ -1,4 +1,10 @@
-<p align="center"><img src="/art/socialcard.png" alt="Social Card of Laravel Legal Consent"></p>
+<p align="center">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="/art/socialcard-dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="/art/socialcard-light.png">
+  <img src="/art/socialcard-light.png" alt="Social Card of Laravel Legal Consent">
+</picture>
+</p>
 
 # Laravel Legal Consent
 
@@ -285,11 +291,11 @@ Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed re
 
 ## Contributing
 
-Please see [CONTRIBUTING](.github/CONTRIBUTING.md) for details.
+Please see [CONTRIBUTING](https://github.com/maize-tech/.github/blob/main/CONTRIBUTING.md) for details.
 
 ## Security Vulnerabilities
 
-Please review [our security policy](../../security/policy) on how to report security vulnerabilities.
+Please review [our security policy](https://github.com/maize-tech/.github/security/policy) on how to report security vulnerabilities.
 
 ## Credits
 
