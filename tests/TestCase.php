@@ -3,14 +3,13 @@
 namespace Maize\LegalConsent\Tests;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 use Maize\LegalConsent\LegalConsentServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
 
 class TestCase extends Orchestra
 {
-    use RefreshDatabase;
-
     public function setUp(): void
     {
         parent::setUp();
@@ -29,12 +28,7 @@ class TestCase extends Orchestra
 
     public function getEnvironmentSetUp($app)
     {
-        config()->set('database.default', 'sqlite');
-        config()->set('database.connections.sqlite', [
-            'driver' => 'sqlite',
-            'database' => ':memory:',
-            'prefix' => '',
-        ]);
+        config()->set('database.default', 'testing');
 
         config()->set('auth.guards', [
             'web' => [
@@ -53,14 +47,18 @@ class TestCase extends Orchestra
             'type2',
         ]);
 
-        include_once __DIR__.'/../database/migrations/create_users_table.php.stub';
-        (new \CreateUsersTable())->up();
+        Schema::create('users', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->timestamps();
+        });
 
-        include_once __DIR__.'/../database/migrations/create_admins_table.php.stub';
-        (new \CreateAdminsTable())->up();
+        Schema::create('admins', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->timestamps();
+        });
 
-        include_once __DIR__.'/../database/migrations/create_legal_consent_tables.php.stub';
-        (new \CreateLegalConsentTables())->up();
+        $migration = include __DIR__.'/../database/migrations/create_legal_consent_tables.php.stub';
+        $migration->up();
     }
 
     public function getRouteByPartialName(string $name, ...$args)
