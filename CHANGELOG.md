@@ -2,6 +2,13 @@
 
 All notable changes to `laravel-legal-consent` will be documented in this file.
 
+## 3.2.0 - 2024-03-27
+
+### What's Changed
+
+* UPDATE php8.3 by @enricodelazzari in https://github.com/maize-tech/laravel-legal-consent/pull/20
+* Laravel 11 by @enricodelazzari in https://github.com/maize-tech/laravel-legal-consent/pull/23
+
 ## 3.1.0 - 2023-02-13
 
 ### What's Changed
