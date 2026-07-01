@@ -40,7 +40,7 @@ abstract class LegalDocumentFinder
 
     protected function validateType(string $type): void
     {
-        if (! in_array($type, Config::getAllowedDocumentTypes())) {
+        if (! in_array($type, Config::getAllowedDocumentTypes(), true)) {
             throw new InvalidDocumentTypeException;
         }
     }

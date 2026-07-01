@@ -82,8 +82,6 @@ class LegalDocument extends Model
             static::legalCacheKey($document->type)
         );
 
-        static::created($flushCache);
-        static::updated($flushCache);
         static::saved($flushCache);
         static::deleted($flushCache);
     }

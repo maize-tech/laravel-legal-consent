@@ -2,6 +2,7 @@
 
 namespace Maize\LegalConsent\Http\Resources;
 
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Maize\LegalConsent\Models\LegalConsent;
 
@@ -18,7 +19,7 @@ class LegalConsentResource extends JsonResource
      *
      * @return array<string, mixed>
      */
-    public function toArray($request)
+    public function toArray(Request $request): array
     {
         return [
             'id' => $this->id,
