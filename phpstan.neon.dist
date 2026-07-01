@@ -1,11 +1,9 @@
-includes:
-    - phpstan-baseline.neon
-
 parameters:
-    level: 5
+    level: 8
     paths:
         - src
         - config
         - database
+        - tests/Support/Models
     tmpDir: build/phpstan
     checkModelProperties: true

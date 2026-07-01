@@ -4,28 +4,26 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 use Maize\LegalConsent\Http\Controllers\LegalConsentController;
 use Maize\LegalConsent\Http\Controllers\LegalDocumentController;
+use Maize\LegalConsent\Http\Controllers\WithdrawLegalConsentController;
+use Maize\LegalConsent\Support\Config;
 
-if (config('legal-consent.routes.enabled')) {
-    $prefix = config('legal-consent.routes.prefix');
-    $middleware = config('legal-consent.routes.middleware');
-    $name = config('legal-consent.routes.name');
-
+if (Config::routesEnabled()) {
     Route::group([
-        'prefix' => $prefix,
-        'as' => Str::finish($name, '.'),
-        'middleware' => $middleware,
+        'prefix' => Config::getRoutePrefix(),
+        'as' => Str::finish(Config::getRouteName(), '.'),
+        'middleware' => Config::getRouteMiddleware(),
     ], function () {
 
         Route::get('documents/{type}', LegalDocumentController::class)
             ->name('documents.show')
-            ->middleware(
-                config('legal-consent.routes.endpoints.show.middleware')
-            );
+            ->middleware(Config::getShowMiddleware());
 
         Route::post('documents/{document}', LegalConsentController::class)
             ->name('documents.consent')
-            ->middleware(
-                config('legal-consent.routes.endpoints.consent.middleware')
-            );
+            ->middleware(Config::getConsentMiddleware());
+
+        Route::delete('documents/{document}', WithdrawLegalConsentController::class)
+            ->name('documents.withdraw')
+            ->middleware(Config::getWithdrawMiddleware());
     });
 }

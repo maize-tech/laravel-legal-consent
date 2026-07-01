@@ -2,23 +2,21 @@
 
 namespace Maize\LegalConsent\Http\Controllers;
 
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use Maize\LegalConsent\Contracts\LegalConsenter;
-use Maize\LegalConsent\Http\Requests\StoreLegalConsentRequest;
 use Maize\LegalConsent\Models\LegalDocument;
 
-class LegalConsentController extends Controller
+class WithdrawLegalConsentController extends Controller
 {
-    public function __invoke(StoreLegalConsentRequest $request, LegalDocument $document): Response
+    public function __invoke(Request $request, LegalDocument $document): Response
     {
         $user = $request->user();
 
         abort_unless($user instanceof LegalConsenter, Response::HTTP_UNAUTHORIZED);
 
-        $user->acceptLegalDocument($document, array_filter([
-            'locale' => $request->input('locale'),
-        ]));
+        $user->withdrawLegalDocument($document);
 
         return response()->noContent();
     }

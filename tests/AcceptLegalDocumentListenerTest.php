@@ -5,7 +5,7 @@ use Illuminate\Auth\Events\Registered;
 use Maize\LegalConsent\Listeners\AcceptLegalDocumentListener;
 use Maize\LegalConsent\Models\LegalConsent;
 use Maize\LegalConsent\Models\LegalDocument;
-use Maize\LegalConsent\Tests\Models\User;
+use Maize\LegalConsent\Tests\Support\Models\User;
 
 it('can auto accept documents after registration', function () {
     $user = User::factory()->create();
@@ -109,4 +109,34 @@ it('ignores event if no user is set', function () {
     $table = (new LegalConsent)->getTable();
 
     $this->assertDatabaseCount($table, 0);
+});
+
+it('auto accepts on the registered event when enabled', function () {
+    config()->set('legal-consent.auto_accept_on_registered', true);
+
+    $user = User::factory()->create();
+    $type = config('legal-consent.allowed_document_types')[0];
+
+    LegalDocument::factory()->published()->create(['type' => $type]);
+
+    request()->merge(["{$type}_accepted" => 1]);
+
+    event(new Registered($user));
+
+    $this->assertDatabaseCount((new LegalConsent)->getTable(), 1);
+});
+
+it('does not auto accept on the registered event when disabled', function () {
+    config()->set('legal-consent.auto_accept_on_registered', false);
+
+    $user = User::factory()->create();
+    $type = config('legal-consent.allowed_document_types')[0];
+
+    LegalDocument::factory()->published()->create(['type' => $type]);
+
+    request()->merge(["{$type}_accepted" => 1]);
+
+    event(new Registered($user));
+
+    $this->assertDatabaseCount((new LegalConsent)->getTable(), 0);
 });

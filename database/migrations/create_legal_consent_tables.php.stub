@@ -6,25 +6,35 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up()
+    public function up(): void
     {
         Schema::create('legal_documents', function (Blueprint $table) {
             $table->id();
-            $table->string('type');
+            $table->string('type')->index();
+            $table->unsignedInteger('version')->nullable();
+            $table->string('status')->default('draft')->index();
             $table->mediumText('body');
-            $table->string('notes');
-            $table->dateTime('published_at')->nullable();
+            $table->string('notes')->nullable();
+            $table->char('content_hash', 64)->nullable();
+            $table->dateTime('published_at')->nullable()->index();
             $table->timestamps();
         });
 
         Schema::create('legal_consents', function (Blueprint $table) {
+            $table->id();
             $table->foreignId('document_id')->constrained('legal_documents')->cascadeOnUpdate()->cascadeOnDelete();
             $table->morphs('user');
+            $table->char('content_hash', 64)->nullable();
+            $table->text('ip_address')->nullable();
+            $table->text('user_agent')->nullable();
+            $table->string('locale')->nullable();
+            $table->dateTime('accepted_at')->nullable();
+            $table->dateTime('withdrawn_at')->nullable();
             $table->timestamps();
         });
     }
 
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('legal_consents');
         Schema::dropIfExists('legal_documents');
