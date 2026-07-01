@@ -23,16 +23,10 @@ You can install the package via composer:
 composer require maize-tech/laravel-legal-consent
 ```
 
-You can publish and run the migrations with:
+Then run the install command, which publishes the config file, publishes the migrations and runs them for you:
 
 ```bash
-php artisan vendor:publish --tag="legal-consent-migrations"
-php artisan migrate
-```
-
-You can publish the config file with:
-```bash
-php artisan vendor:publish --tag="legal-consent-config"
+php artisan legal-consent:install
 ```
 
 This is the content of the published config file:

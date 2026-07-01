@@ -6,6 +6,7 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Event;
 use Maize\LegalConsent\Listeners\AcceptLegalDocumentListener;
 use Maize\LegalConsent\Support\Config;
+use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 
@@ -18,7 +19,14 @@ class LegalConsentServiceProvider extends PackageServiceProvider
             ->hasConfigFile()
             ->hasRoute('routes')
             ->hasMigration('create_legal_consent_tables')
-            ->hasMigration('upgrade_legal_consent_tables_to_v2');
+            ->hasMigration('upgrade_legal_consent_tables_to_v2')
+            ->hasInstallCommand(function (InstallCommand $command): void {
+                $command
+                    ->publishConfigFile()
+                    ->publishMigrations()
+                    ->askToRunMigrations()
+                    ->askToStarRepoOnGitHub('maize-tech/laravel-legal-consent');
+            });
     }
 
     public function packageBooted(): void
