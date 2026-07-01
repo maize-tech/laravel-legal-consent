@@ -19,7 +19,7 @@ class LegalConsentServiceProvider extends PackageServiceProvider
             ->hasConfigFile()
             ->hasRoute('routes')
             ->hasMigration('create_legal_consent_tables')
-            ->hasMigration('upgrade_legal_consent_tables_to_v2')
+            ->hasMigration('upgrade_legal_consent_tables_to_v4')
             ->hasInstallCommand(function (InstallCommand $command): void {
                 $command
                     ->publishConfigFile()

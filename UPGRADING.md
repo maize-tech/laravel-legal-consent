@@ -1,13 +1,13 @@
-# Upgrading from 1.x to 2.0
+# Upgrading from 3.x to 4.0
 
-Version 2.0 turns the package from a simple "consent checkbox log" into a GDPR-oriented consent
+Version 4.0 turns the package from a simple "consent checkbox log" into a GDPR-oriented consent
 store: it adds an audit trail, consent withdrawal, document versioning and events. This requires
 schema and API changes, so it is a **breaking release**. This guide walks you through the upgrade.
 
 ## 1. Update the dependency
 
 ```bash
-composer require maize-tech/laravel-legal-consent:^2.0
+composer require maize-tech/laravel-legal-consent:^4.0
 ```
 
 ## 2. Run the upgrade migration
@@ -19,7 +19,7 @@ php artisan vendor:publish --tag="legal-consent-migrations"
 php artisan migrate
 ```
 
-This publishes `upgrade_legal_consent_tables_to_v2`, which:
+This publishes `upgrade_legal_consent_tables_to_v4`, which:
 
 - adds `version`, `status` and `content_hash` to `legal_documents` and backfills `content_hash`
   from the existing `body` of each document (existing documents are marked as `published`);
@@ -27,10 +27,10 @@ This publishes `upgrade_legal_consent_tables_to_v2`, which:
   (`content_hash`, `ip_address`, `user_agent`, `locale`, `accepted_at`, `withdrawn_at`),
   copying every existing consent across and backfilling `accepted_at` from `created_at`.
 
-The migration is guarded and idempotent: running it on a fresh 2.0 install is a safe no-op.
+The migration is guarded and idempotent: running it on a fresh 4.0 install is a safe no-op.
 
 > **Do not re-run `create_legal_consent_tables`** on an existing install — only the upgrade
-> migration should run against a 1.x database.
+> migration should run against a 3.x database.
 
 ## 3. Implement the `LegalConsenter` contract
 

@@ -6,9 +6,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * Upgrades an existing 1.x schema to 2.0.
+ * Upgrades an existing 3.x schema to 4.0.
  *
- * Every change is guarded so the migration is a safe no-op on a fresh 2.0
+ * Every change is guarded so the migration is a safe no-op on a fresh 4.0
  * install (where "create_legal_consent_tables" already provisions everything).
  * See UPGRADING.md for details.
  */
@@ -43,7 +43,7 @@ return new class extends Migration
 
         // --- legal_consents ---
         if (! Schema::hasColumn('legal_consents', 'id')) {
-            // The 1.x pivot table has no surrogate key. Adding an auto-increment
+            // The 3.x pivot table has no surrogate key. Adding an auto-increment
             // primary key via ALTER is not portable (SQLite forbids it), so we
             // build the new table under a temporary name (its indexes and
             // foreign keys are named after that temporary table, avoiding any
@@ -85,7 +85,7 @@ return new class extends Migration
             return;
         }
 
-        // Table already has a surrogate key (fresh 2.0 or a partial upgrade):
+        // Table already has a surrogate key (fresh 4.0 or a partial upgrade):
         // only add whatever audit columns are still missing.
         Schema::table('legal_consents', function (Blueprint $table) {
             if (! Schema::hasColumn('legal_consents', 'content_hash')) {

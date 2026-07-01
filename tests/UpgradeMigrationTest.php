@@ -4,8 +4,8 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
-it('upgrades a legacy 1.x schema and backfills audit data', function () {
-    // Recreate the original 1.x schema.
+it('upgrades a legacy 3.x schema and backfills audit data', function () {
+    // Recreate the original 3.x schema.
     Schema::dropIfExists('legal_consents');
     Schema::dropIfExists('legal_documents');
 
@@ -41,7 +41,7 @@ it('upgrades a legacy 1.x schema and backfills audit data', function () {
         'updated_at' => '2021-02-02 10:00:00',
     ]);
 
-    $migration = include __DIR__.'/../database/migrations/upgrade_legal_consent_tables_to_v2.php.stub';
+    $migration = include __DIR__.'/../database/migrations/upgrade_legal_consent_tables_to_v4.php.stub';
     $migration->up();
 
     $document = DB::table('legal_documents')->first();
@@ -53,10 +53,10 @@ it('upgrades a legacy 1.x schema and backfills audit data', function () {
     expect($consent->accepted_at)->toBe('2021-02-02 10:00:00');
 });
 
-it('is a safe no-op on a fresh 2.0 schema', function () {
-    // The 2.0 schema is already created by the base TestCase, so running the
+it('is a safe no-op on a fresh 4.0 schema', function () {
+    // The 4.0 schema is already created by the base TestCase, so running the
     // upgrade migration must not throw and must leave every column in place.
-    $migration = include __DIR__.'/../database/migrations/upgrade_legal_consent_tables_to_v2.php.stub';
+    $migration = include __DIR__.'/../database/migrations/upgrade_legal_consent_tables_to_v4.php.stub';
 
     $migration->up();
 
