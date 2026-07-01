@@ -4,7 +4,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Arr;
 use Maize\LegalConsent\Models\LegalConsent;
 use Maize\LegalConsent\Models\LegalDocument;
-use Maize\LegalConsent\Tests\Models\User;
+use Maize\LegalConsent\Tests\Support\Models\User;
 
 it('can accept document', function () {
     $type = Arr::first(config('legal-consent.allowed_document_types'));

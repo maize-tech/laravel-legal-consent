@@ -75,6 +75,36 @@ it('can not get a non published document', function () {
         ->assertStatus(404);
 });
 
+it('can not get a draft document even if published_at is in the past', function () {
+    $type = Arr::first(config('legal-consent.allowed_document_types'));
+
+    LegalDocument::factory()->draft()->create([
+        'type' => $type,
+        'published_at' => Carbon::now()->subDays(2),
+    ]);
+
+    $route = $this->getRouteByPartialName('documents.show', compact('type'));
+
+    $this
+        ->getJson($route)
+        ->assertStatus(404);
+});
+
+it('can not get an archived document', function () {
+    $type = Arr::first(config('legal-consent.allowed_document_types'));
+
+    LegalDocument::factory()->archived()->create([
+        'type' => $type,
+        'published_at' => Carbon::now()->subDays(2),
+    ]);
+
+    $route = $this->getRouteByPartialName('documents.show', compact('type'));
+
+    $this
+        ->getJson($route)
+        ->assertStatus(404);
+});
+
 it('can get latest document', function () {
     $type = Arr::first(config('legal-consent.allowed_document_types'));
 

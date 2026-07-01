@@ -6,9 +6,14 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Cache;
 use Maize\LegalConsent\Exceptions\InvalidDocumentTypeException;
 use Maize\LegalConsent\Models\LegalDocument;
+use Maize\LegalConsent\Support\Config;
 
 abstract class LegalDocumentFinder
 {
+    /**
+     * @param  Builder<LegalDocument>  $builder
+     * @return Builder<LegalDocument>
+     */
     abstract public function query(Builder $builder, string $type): Builder;
 
     public function findForType(string $type, bool $fail = false): ?LegalDocument
@@ -16,17 +21,13 @@ abstract class LegalDocumentFinder
         $this->validateType($type);
 
         $model = $this->getLegalDocumentModel();
-        $builder = $model::query();
-
-        $first = $fail ? 'firstOrFail' : 'first';
+        $query = $this->query($model::query(), $type);
 
         /** @var LegalDocument|null $document */
         $document = Cache::remember(
             $model::legalCacheKey($type),
-            config('legal-consent.cache.document_ttl'),
-            fn () => $this
-                ->query($builder, $type)
-                ->$first()
+            Config::getDocumentCacheTtl(),
+            fn () => $fail ? $query->firstOrFail() : $query->first()
         );
 
         return $document;
@@ -34,14 +35,12 @@ abstract class LegalDocumentFinder
 
     protected function getLegalDocumentModel(): LegalDocument
     {
-        $legalDocumentModelClass = (string) config('legal-consent.legal_document_model');
-
-        return new $legalDocumentModelClass;
+        return Config::getLegalDocumentModel();
     }
 
     protected function validateType(string $type): void
     {
-        if (! in_array($type, config('legal-consent.allowed_document_types'))) {
+        if (! in_array($type, Config::getAllowedDocumentTypes())) {
             throw new InvalidDocumentTypeException;
         }
     }

@@ -60,8 +60,39 @@ return [
             'consent' => [
                 'middleware' => ['auth:api'],
             ],
+            'withdraw' => [
+                'middleware' => ['auth:api'],
+            ],
         ],
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Auto accept on registration
+    |--------------------------------------------------------------------------
+    |
+    | When enabled, the package listens to the framework's Registered event and
+    | automatically accepts every allowed document type whose consent value is
+    | present in the request (e.g. "privacy-policy_accepted"). Disabled by
+    | default: opt in only if you want registration to record consent.
+    |
+    */
+
+    'auto_accept_on_registered' => false,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Encrypt audit metadata
+    |--------------------------------------------------------------------------
+    |
+    | The IP address and user agent stored alongside each consent are personal
+    | data (GDPR art. 32). When enabled, they are encrypted at rest using the
+    | application key. Disable only if you need to query these columns in clear
+    | text (note: doing so stores personal data unencrypted).
+    |
+    */
+
+    'encrypt_audit_metadata' => true,
 
     /*
     |--------------------------------------------------------------------------

@@ -1,0 +1,138 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+
+/**
+ * Upgrades an existing 1.x schema to 2.0.
+ *
+ * Every change is guarded so the migration is a safe no-op on a fresh 2.0
+ * install (where "create_legal_consent_tables" already provisions everything).
+ * See UPGRADING.md for details.
+ */
+return new class extends Migration
+{
+    public function up(): void
+    {
+        // --- legal_documents: additive columns (portable on every driver). ---
+        Schema::table('legal_documents', function (Blueprint $table) {
+            if (! Schema::hasColumn('legal_documents', 'version')) {
+                $table->unsignedInteger('version')->nullable()->after('type');
+            }
+
+            if (! Schema::hasColumn('legal_documents', 'status')) {
+                // Existing documents were already being served, so default them to published.
+                $table->string('status')->default('published')->index();
+            }
+
+            if (! Schema::hasColumn('legal_documents', 'content_hash')) {
+                $table->char('content_hash', 64)->nullable();
+            }
+        });
+
+        DB::table('legal_documents')
+            ->whereNull('content_hash')
+            ->orderBy('id')
+            ->each(function ($document) {
+                DB::table('legal_documents')
+                    ->where('id', $document->id)
+                    ->update(['content_hash' => hash('sha256', (string) $document->body)]);
+            });
+
+        // --- legal_consents ---
+        if (! Schema::hasColumn('legal_consents', 'id')) {
+            // The 1.x pivot table has no surrogate key. Adding an auto-increment
+            // primary key via ALTER is not portable (SQLite forbids it), so we
+            // build the new table under a temporary name (its indexes and
+            // foreign keys are named after that temporary table, avoiding any
+            // collision), copy the existing consents across, then swap it in.
+            Schema::create('legal_consents_upgraded', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('document_id')->constrained('legal_documents')->cascadeOnUpdate()->cascadeOnDelete();
+                $table->morphs('user');
+                $table->char('content_hash', 64)->nullable();
+                $table->text('ip_address')->nullable();
+                $table->text('user_agent')->nullable();
+                $table->string('locale')->nullable();
+                $table->dateTime('accepted_at')->nullable();
+                $table->dateTime('withdrawn_at')->nullable();
+                $table->timestamps();
+            });
+
+            DB::table('legal_consents')
+                ->orderBy('document_id')
+                ->each(function ($consent) {
+                    $hash = DB::table('legal_documents')
+                        ->where('id', $consent->document_id)
+                        ->value('content_hash');
+
+                    DB::table('legal_consents_upgraded')->insert([
+                        'document_id' => $consent->document_id,
+                        'user_type' => $consent->user_type,
+                        'user_id' => $consent->user_id,
+                        'content_hash' => $hash,
+                        'accepted_at' => $consent->created_at,
+                        'created_at' => $consent->created_at,
+                        'updated_at' => $consent->updated_at,
+                    ]);
+                });
+
+            Schema::drop('legal_consents');
+            Schema::rename('legal_consents_upgraded', 'legal_consents');
+
+            return;
+        }
+
+        // Table already has a surrogate key (fresh 2.0 or a partial upgrade):
+        // only add whatever audit columns are still missing.
+        Schema::table('legal_consents', function (Blueprint $table) {
+            if (! Schema::hasColumn('legal_consents', 'content_hash')) {
+                $table->char('content_hash', 64)->nullable();
+            }
+
+            if (! Schema::hasColumn('legal_consents', 'ip_address')) {
+                $table->text('ip_address')->nullable();
+            }
+
+            if (! Schema::hasColumn('legal_consents', 'user_agent')) {
+                $table->text('user_agent')->nullable();
+            }
+
+            if (! Schema::hasColumn('legal_consents', 'locale')) {
+                $table->string('locale')->nullable();
+            }
+
+            if (! Schema::hasColumn('legal_consents', 'accepted_at')) {
+                $table->dateTime('accepted_at')->nullable();
+            }
+
+            if (! Schema::hasColumn('legal_consents', 'withdrawn_at')) {
+                $table->dateTime('withdrawn_at')->nullable();
+            }
+        });
+
+        DB::table('legal_consents')
+            ->whereNull('accepted_at')
+            ->update(['accepted_at' => DB::raw('created_at')]);
+    }
+
+    public function down(): void
+    {
+        Schema::table('legal_consents', function (Blueprint $table) {
+            $table->dropColumn([
+                'content_hash',
+                'ip_address',
+                'user_agent',
+                'locale',
+                'accepted_at',
+                'withdrawn_at',
+            ]);
+        });
+
+        Schema::table('legal_documents', function (Blueprint $table) {
+            $table->dropColumn(['version', 'status', 'content_hash']);
+        });
+    }
+};

@@ -5,13 +5,13 @@ namespace Maize\LegalConsent\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Maize\LegalConsent\Http\Resources\LegalDocumentResource;
+use Maize\LegalConsent\Support\Config;
 
 class LegalDocumentController extends Controller
 {
-    public function __invoke(Request $request, string $type)
+    public function __invoke(Request $request, string $type): LegalDocumentResource
     {
-        $finderClass = config('legal-consent.legal_document_finder');
-        $document = app($finderClass)->findForType($type, true);
+        $document = Config::getFinder()->findForType($type, true);
 
         return new LegalDocumentResource($document);
     }

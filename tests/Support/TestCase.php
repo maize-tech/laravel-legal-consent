@@ -1,8 +1,7 @@
 <?php
 
-namespace Maize\LegalConsent\Tests;
+namespace Maize\LegalConsent\Tests\Support;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Maize\LegalConsent\LegalConsentServiceProvider;
@@ -10,15 +9,6 @@ use Orchestra\Testbench\TestCase as Orchestra;
 
 class TestCase extends Orchestra
 {
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        Factory::guessFactoryNamesUsing(
-            fn (string $modelName) => 'Maize\\LegalConsent\\Database\\Factories\\'.class_basename($modelName).'Factory'
-        );
-    }
-
     protected function getPackageProviders($app)
     {
         return [
@@ -29,6 +19,8 @@ class TestCase extends Orchestra
     public function getEnvironmentSetUp($app)
     {
         config()->set('database.default', 'testing');
+
+        config()->set('app.key', 'base64:KaV0yQ1Ze6BBJvyNt6zowODZZq79US0KfO2ZBSkEOAM=');
 
         config()->set('auth.guards', [
             'web' => [
@@ -57,7 +49,7 @@ class TestCase extends Orchestra
             $table->timestamps();
         });
 
-        $migration = include __DIR__.'/../database/migrations/create_legal_consent_tables.php.stub';
+        $migration = include __DIR__.'/../../database/migrations/create_legal_consent_tables.php.stub';
         $migration->up();
     }
 

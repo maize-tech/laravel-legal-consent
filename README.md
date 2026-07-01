@@ -94,8 +94,37 @@ return [
             'consent' => [
                 'middleware' => ['auth:api'],
             ],
+            'withdraw' => [
+                'middleware' => ['auth:api'],
+            ],
         ],
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Auto accept on registration
+    |--------------------------------------------------------------------------
+    |
+    | When enabled, the package listens to the framework's Registered event and
+    | automatically accepts every allowed document type whose consent value is
+    | present in the request. Disabled by default.
+    |
+    */
+
+    'auto_accept_on_registered' => false,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Encrypt audit metadata
+    |--------------------------------------------------------------------------
+    |
+    | The IP address and user agent stored alongside each consent are personal
+    | data (GDPR art. 32). When enabled, they are encrypted at rest using the
+    | application key.
+    |
+    */
+
+    'encrypt_audit_metadata' => true,
 
     /*
     |--------------------------------------------------------------------------
@@ -151,9 +180,11 @@ return [
 
 ### Basic
 
-To use the package, add the `Maize\LegalConsent\HasLegalConsent` trait to the all Authenticatable models you want to handle.
+To use the package, add the `Maize\LegalConsent\HasLegalConsent` trait and implement the
+`Maize\LegalConsent\Contracts\LegalConsenter` contract on all the Authenticatable models you
+want to handle. The trait provides every method required by the contract.
 
-Here's an example including the `HasLegalConsent` trait to both User and Admin models:
+Here's an example including the `HasLegalConsent` trait on both User and Admin models:
 
 ``` php
 <?php
@@ -161,14 +192,15 @@ Here's an example including the `HasLegalConsent` trait to both User and Admin m
 namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Maize\LegalConsent\Contracts\LegalConsenter;
 use Maize\LegalConsent\HasLegalConsent;
 
-class User extends Authenticatable
+class User extends Authenticatable implements LegalConsenter
 {
     use HasLegalConsent;
 
     protected $fillable = [
-        'fist_name',
+        'first_name',
         'last_name',
         'email',
     ];
@@ -181,14 +213,15 @@ class User extends Authenticatable
 namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Maize\LegalConsent\Contracts\LegalConsenter;
 use Maize\LegalConsent\HasLegalConsent;
 
-class Admin extends Authenticatable
+class Admin extends Authenticatable implements LegalConsenter
 {
     use HasLegalConsent;
 
     protected $fillable = [
-        'fist_name',
+        'first_name',
         'last_name',
         'email',
     ];
@@ -206,11 +239,16 @@ Once done, you must define the list of allowed document types by adding them in 
 
 You can then create one or multiple documents from the DB or, if you wish, you could handle the creation with a CMS.
 
-Here are the fields who should be filled:
+Here are the fields you should fill:
 - **type**: the document type name
+- **status**: the document lifecycle status (`draft`, `published` or `archived`). Defaults to `draft`; only `published` documents are served by the default finder
 - **body**: the content of the document
-- **noted**: additional notes to show for the document
+- **notes**: additional notes to show for the document (optional)
 - **published_at**: the date of publication for the given document
+
+The following fields are managed automatically and should not be set manually:
+- **version**: an incremental version number, assigned per `type` on creation
+- **content_hash**: a `sha256` hash of the `body`, recomputed whenever the document is saved. It is the integrity anchor used for versioning (see below)
 
 Let's say we create a privacy policy document with the publication on 2021-01-01: here's the model entity we would have:
 
@@ -218,8 +256,11 @@ Let's say we create a privacy policy document with the publication on 2021-01-01
 $legalDocument = [
     "id" => 1,
     "type" => "privacy-policy",
+    "version" => 1,
+    "status" => "published",
     "body" => "The privacy policy's very long text",
-    "notes" => "",
+    "notes" => null,
+    "content_hash" => "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
     "published_at" => "2021-01-01",
     "updated_at" => "2021-01-01",
     "created_at" => "2021-01-01",
@@ -244,40 +285,121 @@ Here is a sample response body:
     "data": {
         "id": 1,
         "type": "privacy-policy",
+        "version": 1,
+        "status": "published",
         "body": "The privacy policy's very long text",
-        "notes": "",
+        "notes": null,
+        "content_hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
         "published_at": "2021-01-01"
     }
 }
 ```
 
-#### POST - **/legal/documents/{id}**
+#### POST - **/legal/documents/{document}**
 
 This endpoint stores the consent for the given document from the currently authenticated user.
+The request is authorized only if the user model implements the `LegalConsenter` contract.
 
-### Legal Document Listener
+Along with the consent, the package records an **audit trail** (see below). You may optionally
+pass a `locale` in the request body to override the detected application locale.
 
-You can eventually accept all active legal documents using our listener.
+#### DELETE - **/legal/documents/{document}**
 
-This can be useful, for example, when your application handles the registration of users, and they must accept all legal documents through a checkbox before proceeding.
+This endpoint withdraws every active consent the currently authenticated user has for the given
+document. The consent rows are kept for the audit trail and simply flagged as withdrawn.
 
-In this case, all you should do is add the listener to the `Registered` event in `EventServiceProvider`:
+### Audit trail (GDPR)
+
+Every acceptance stores the information needed to prove the consent later on:
+
+- **content_hash**: a snapshot of the document `content_hash` at the moment of acceptance
+- **accepted_at**: the acceptance timestamp
+- **ip_address** and **user_agent**: captured from the request
+- **locale**: the locale in effect at acceptance time
+
+Because the IP address and the user agent are personal data (GDPR art. 32), they are **encrypted
+at rest** by default using the application key. You can disable this via the `encrypt_audit_metadata`
+config key (note that doing so stores them in clear text and makes them queryable).
+
+### Versioning
+
+Each document carries a `content_hash` derived from its `body`. When a user accepts a document,
+that hash is copied onto the consent. `hasAcceptedLegalDocument()` returns `true` only when the
+user has an **active** consent whose hash **matches the current document body**.
+
+This means that editing a document's body automatically invalidates previously granted consents,
+forcing users to accept the new version — no silent, stale consents.
+
+### Accepting and withdrawing programmatically
 
 ``` php
-use Maize\LegalConsent\Listeners\AcceptLegalDocumentListener;
+// Accept the latest published document of a given type
+$user->acceptDefaultLegalDocument('privacy-policy');
 
-/**
- * The event listener mappings for the application.
- *
- * @var array
- */
-protected $listen = [
-    Registered::class => [
-        AcceptLegalDocumentListener::class, // all currently active legal documents will be accepted
-        SendEmailVerificationNotification::class,
-    ],
-];
+// Accept a specific document (optionally overriding the audit metadata)
+$user->acceptLegalDocument($document, [
+    'ip_address' => $request->ip(),
+    'user_agent' => $request->userAgent(),
+    'locale' => 'en',
+]);
+
+// Check the current state
+$user->hasAcceptedLegalDocument($document);
+
+// Withdraw every active consent for a document
+$user->withdrawLegalDocument($document);
 ```
+
+### Events
+
+The package dispatches the following events, which you can listen to as usual:
+
+- `Maize\LegalConsent\Events\LegalDocumentAccepted`
+- `Maize\LegalConsent\Events\LegalConsentWithdrawn`
+
+Each event exposes the `consenter`, the `document` and the `consent` involved.
+
+### Auto accepting on registration
+
+You can automatically accept all active legal documents when a user registers, which is useful
+when the registration form contains the consent checkboxes.
+
+Instead of manually wiring a listener (the `EventServiceProvider` is deprecated since Laravel 11),
+simply enable the `auto_accept_on_registered` config key:
+
+``` php
+// config/legal-consent.php
+'auto_accept_on_registered' => true,
+```
+
+The package will then listen to the framework's `Registered` event and accept every allowed
+document type whose consent value (e.g. `privacy-policy_accepted`) is present in the request.
+
+### Multi-language documents
+
+The package intentionally does not ship a translation strategy: the document model is fully
+swappable via the `legal_document_model` config key, so you can bring your own. A common recipe
+is to extend the model and add [spatie/laravel-translatable](https://github.com/spatie/laravel-translatable):
+
+``` php
+<?php
+
+namespace App\Models;
+
+use Maize\LegalConsent\Models\LegalDocument as BaseLegalDocument;
+use Spatie\Translatable\HasTranslations;
+
+class LegalDocument extends BaseLegalDocument
+{
+    use HasTranslations;
+
+    public array $translatable = ['body', 'notes'];
+}
+```
+
+> **Note on `content_hash`**: with a translatable `body`, the automatically computed hash is
+> derived from the full JSON payload of all locales. If you need per-locale integrity, override
+> the hashing logic in your model (e.g. hash the accepted locale's text) to match your policy.
 
 ## Testing
 

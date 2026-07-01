@@ -20,8 +20,11 @@ class LegalDocumentResource extends JsonResource
         return [
             'id' => $this->id,
             'type' => $this->type,
+            'version' => $this->version,
+            'status' => $this->status->value,
             'body' => $this->body,
             'notes' => $this->notes,
+            'content_hash' => $this->content_hash,
             'published_at' => $this->published_at,
         ];
     }

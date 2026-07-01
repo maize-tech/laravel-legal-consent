@@ -3,8 +3,8 @@
 use Carbon\Carbon;
 use Maize\LegalConsent\Models\LegalConsent;
 use Maize\LegalConsent\Models\LegalDocument;
-use Maize\LegalConsent\Tests\Models\Admin;
-use Maize\LegalConsent\Tests\Models\User;
+use Maize\LegalConsent\Tests\Support\Models\Admin;
+use Maize\LegalConsent\Tests\Support\Models\User;
 
 it('can check if user has accepted document', function () {
     $users = User::factory(2)->create();

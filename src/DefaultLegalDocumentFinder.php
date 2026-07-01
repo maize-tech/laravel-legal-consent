@@ -2,8 +2,8 @@
 
 namespace Maize\LegalConsent;
 
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Maize\LegalConsent\Enums\DocumentStatus;
 
 class DefaultLegalDocumentFinder extends LegalDocumentFinder
 {
@@ -11,7 +11,9 @@ class DefaultLegalDocumentFinder extends LegalDocumentFinder
     {
         return $builder
             ->where('type', $type)
-            ->whereDate('published_at', '<=', Carbon::now())
+            ->where('status', DocumentStatus::Published)
+            ->whereNotNull('published_at')
+            ->where('published_at', '<=', now())
             ->latest('published_at');
     }
 }
