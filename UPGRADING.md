@@ -12,14 +12,21 @@ composer require maize-tech/laravel-legal-consent:^4.0
 
 ## 2. Run the upgrade migration
 
-Publish the migrations again and run them:
+4.0 ships a dedicated `upgrade_legal_consent_tables_to_v4` migration. Publish it into your
+application and run it:
 
 ```bash
 php artisan vendor:publish --tag="legal-consent-migrations"
 php artisan migrate
 ```
 
-This publishes `upgrade_legal_consent_tables_to_v4`, which:
+`vendor:publish` only copies package migrations that are not yet present in your
+`database/migrations` folder, so this adds the single new `upgrade_legal_consent_tables_to_v4`
+file. Your existing `create_legal_consent_tables` migration is left untouched: it is already
+recorded in the `migrations` table, so it is neither re-published nor re-run. `php artisan migrate`
+therefore runs only the upgrade migration, exactly once.
+
+The upgrade migration:
 
 - adds `version`, `status` and `content_hash` to `legal_documents` and backfills `content_hash`
   from the existing `body` of each document (existing documents are marked as `published`);
@@ -27,10 +34,11 @@ This publishes `upgrade_legal_consent_tables_to_v4`, which:
   (`content_hash`, `ip_address`, `user_agent`, `locale`, `accepted_at`, `withdrawn_at`),
   copying every existing consent across and backfilling `accepted_at` from `created_at`.
 
-The migration is guarded and idempotent: running it on a fresh 4.0 install is a safe no-op.
+It is guarded and idempotent, so running it on a fresh 4.0 install is a safe no-op.
 
-> **Do not re-run `create_legal_consent_tables`** on an existing install — only the upgrade
-> migration should run against a 3.x database.
+> **Do not pass `--force`.** It would overwrite your published `create_legal_consent_tables`
+> migration with the 4.0 version — pointless (it has already run) and it only muddies your
+> migration history.
 
 ## 3. Implement the `LegalConsenter` contract
 
