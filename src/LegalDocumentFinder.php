@@ -20,26 +20,29 @@ abstract class LegalDocumentFinder
 
         $first = $fail ? 'firstOrFail' : 'first';
 
-        return Cache::remember(
+        /** @var LegalDocument|null $document */
+        $document = Cache::remember(
             $model::legalCacheKey($type),
             config('legal-consent.cache.document_ttl'),
             fn () => $this
                 ->query($builder, $type)
                 ->$first()
         );
+
+        return $document;
     }
 
     protected function getLegalDocumentModel(): LegalDocument
     {
         $legalDocumentModelClass = (string) config('legal-consent.legal_document_model');
 
-        return new $legalDocumentModelClass();
+        return new $legalDocumentModelClass;
     }
 
     protected function validateType(string $type): void
     {
         if (! in_array($type, config('legal-consent.allowed_document_types'))) {
-            throw new InvalidDocumentTypeException();
+            throw new InvalidDocumentTypeException;
         }
     }
 }

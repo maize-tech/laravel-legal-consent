@@ -4,8 +4,16 @@ namespace Maize\LegalConsent\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 
+/**
+ * @property int $id
+ * @property string $type
+ * @property string|null $body
+ * @property string|null $notes
+ * @property Carbon|null $published_at
+ */
 class LegalDocument extends Model
 {
     use HasFactory;

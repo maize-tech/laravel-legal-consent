@@ -2,8 +2,8 @@
 
 namespace Maize\LegalConsent\Database\Factories;
 
-use Maize\LegalConsent\Tests\Models\Admin;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Maize\LegalConsent\Tests\Models\Admin;
 
 class AdminFactory extends Factory
 {

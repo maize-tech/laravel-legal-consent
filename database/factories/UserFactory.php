@@ -2,8 +2,8 @@
 
 namespace Maize\LegalConsent\Database\Factories;
 
-use Maize\LegalConsent\Tests\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Maize\LegalConsent\Tests\Models\User;
 
 class UserFactory extends Factory
 {
