@@ -1,9 +1,9 @@
 <?php
 
-use Maize\LegalConsent\Http\Controllers\LegalDocumentController;
-use Maize\LegalConsent\Http\Controllers\LegalConsentController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
+use Maize\LegalConsent\Http\Controllers\LegalConsentController;
+use Maize\LegalConsent\Http\Controllers\LegalDocumentController;
 
 if (config('legal-consent.routes.enabled')) {
     $prefix = config('legal-consent.routes.prefix');
@@ -25,7 +25,7 @@ if (config('legal-consent.routes.enabled')) {
         Route::post('documents/{document}', LegalConsentController::class)
             ->name('documents.consent')
             ->middleware(
-               config('legal-consent.routes.endpoints.consent.middleware')
+                config('legal-consent.routes.endpoints.consent.middleware')
             );
     });
 }

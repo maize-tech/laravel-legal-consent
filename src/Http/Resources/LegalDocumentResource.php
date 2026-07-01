@@ -2,16 +2,18 @@
 
 namespace Maize\LegalConsent\Http\Resources;
 
-use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Maize\LegalConsent\Models\LegalDocument;
 
+/**
+ * @mixin LegalDocument
+ */
 class LegalDocumentResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
      *
-     * @param  Request  $request
-     * @return array
+     * @return array<string, mixed>
      */
     public function toArray($request)
     {

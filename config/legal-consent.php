@@ -1,5 +1,9 @@
 <?php
 
+use Maize\LegalConsent\DefaultLegalDocumentFinder;
+use Maize\LegalConsent\Models\LegalConsent;
+use Maize\LegalConsent\Models\LegalDocument;
+
 return [
     /*
     |--------------------------------------------------------------------------
@@ -10,7 +14,7 @@ return [
     |
     */
 
-    'legal_document_model' => Maize\LegalConsent\Models\LegalDocument::class,
+    'legal_document_model' => LegalDocument::class,
 
     /*
     |--------------------------------------------------------------------------
@@ -21,7 +25,7 @@ return [
     |
     */
 
-    'legal_consent_model' => Maize\LegalConsent\Models\LegalConsent::class,
+    'legal_consent_model' => LegalConsent::class,
 
     /*
     |--------------------------------------------------------------------------
@@ -32,7 +36,7 @@ return [
     |
     */
 
-    'legal_document_finder' => Maize\LegalConsent\DefaultLegalDocumentFinder::class,
+    'legal_document_finder' => DefaultLegalDocumentFinder::class,
 
     /*
     |--------------------------------------------------------------------------
